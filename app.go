@@ -16,7 +16,7 @@ func init() {
 	var daoServer = Dao.SettingDao{Server: conf.Server, Database: conf.Database}
 	daoServer.Connect()
 
-	Routes.StartSettingRoutes(conf)
+	Routes.StartSettingRoutes(conf, false)
 	fmt.Println("api was started")
 }
 
