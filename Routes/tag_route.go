@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	apiRouteTag = "/tags"
+	apiRouteTag = "/v1/tags"
 )
 
 var daoTag = Dao.SettingTag{}
@@ -96,11 +96,11 @@ func StartSettingRouterTag(router *mux.Router) {
 
 	var rout = TagRoute{}
 
-	router.HandleFunc(apiRoutearticle, rout.CreateNewTag).Methods("POST")
-	router.HandleFunc(apiRoutearticle, rout.FindAllTags).Methods("GET")
-	router.HandleFunc(apiRoutearticle, rout.FindTagByID).Methods("GET")
-	router.HandleFunc(apiRoutearticle, rout.UpdateTagByID).Methods("PUT")
-	router.HandleFunc(apiRoutearticle, rout.DeleteTagByID).Methods("DELETE")
+	router.HandleFunc(apiRouteTag, rout.CreateNewTag).Methods("POST")
+	router.HandleFunc(apiRouteTag, rout.FindAllTags).Methods("GET")
+	router.HandleFunc(apiRouteTag, rout.FindTagByID).Methods("GET")
+	router.HandleFunc(apiRouteTag, rout.UpdateTagByID).Methods("PUT")
+	router.HandleFunc(apiRouteTag, rout.DeleteTagByID).Methods("DELETE")
 
 	log.Println("routes for tags was configurated")
 }

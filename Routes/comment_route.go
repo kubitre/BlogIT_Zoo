@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	apiRouteComments = "/comments"
+	apiRouteComments = "/v1/comments"
 )
 
 var daoComment = Dao.SettingComment{}
@@ -95,11 +95,11 @@ func StartSettingRouterComment(router *mux.Router) {
 
 	var rout = CommentsRoute{}
 
-	router.HandleFunc(apiRoutearticle, rout.CreateNewComment).Methods("POST")
-	router.HandleFunc(apiRoutearticle, rout.FindAllComments).Methods("GET")
-	router.HandleFunc(apiRoutearticle, rout.FindCommentByID).Methods("GET")
-	router.HandleFunc(apiRoutearticle, rout.UpdateCommentByID).Methods("PUT")
-	router.HandleFunc(apiRoutearticle, rout.DeleteCommentByID).Methods("DELETE")
+	router.HandleFunc(apiRouteComments, rout.CreateNewComment).Methods("POST")
+	router.HandleFunc(apiRouteComments, rout.FindAllComments).Methods("GET")
+	router.HandleFunc(apiRouteComments, rout.FindCommentByID).Methods("GET")
+	router.HandleFunc(apiRouteComments, rout.UpdateCommentByID).Methods("PUT")
+	router.HandleFunc(apiRouteComments, rout.DeleteCommentByID).Methods("DELETE")
 
 	log.Println("router for comments was configurated")
 }

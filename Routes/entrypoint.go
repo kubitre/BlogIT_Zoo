@@ -64,7 +64,7 @@ func (routsetting *RouteSetting) GetAvailableFormats(w http.ResponseWriter, r *h
 }
 
 /*StartSettingRoutes - function for settings database and routes*/
-func StartSettingRoutes(config Config.Configuration) {
+func StartSettingRoutes(config Config.Configuration, flagTest bool) *mux.Router {
 	router := mux.NewRouter()
 	routSetting := RouteSetting{}
 
@@ -77,7 +77,13 @@ func StartSettingRoutes(config Config.Configuration) {
 	router.HandleFunc(apiRouteMain+version+"/status", routSetting.GetStatus).Methods("GET")
 	router.HandleFunc(apiRouteMain+version+"/available", routSetting.GetAvailableFormats).Methods("GET")
 
+	if flagTest {
+		return router
+	}
+
 	if err := http.ListenAndServe(addr, router); err != nil {
 		log.Fatal(err)
 	}
+
+	return router
 }
