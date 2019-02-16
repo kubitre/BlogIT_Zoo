@@ -25,8 +25,8 @@ func (setting *SettingComment) InsertDb(Comment Models.Comment) (err error) {
 
 /*FindByID - function for finding liine in database, on input enter comment model with id which need find and return this object if exist in db or error object
 - функция для поиска элемента в бд по индентификатору и возвратаа этого элемента или ошибки, в случае возникновения*/
-func (setting *SettingComment) FindByID(Comment Models.Comment) (comm Models.Comment, err error) {
-	err = db.C(collectionComments).FindId(Comment.ID).One(comm)
+func (setting *SettingComment) FindByID(id string) (comm Models.Comment, err error) {
+	err = db.C(collectionComments).FindId(bson.ObjectIdHex(id)).One(comm)
 	return
 }
 

@@ -1,6 +1,8 @@
 package Dao
 
 import (
+	"time"
+
 	"github.com/kubitre/blog/Models"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -18,6 +20,9 @@ const (
 /*InsertDb - function for creating new user in db*/
 func (setting *SettingUser) InsertDb(User Models.User) (err error) {
 	User.ID = bson.NewObjectId()
+	User.Verificated = false
+	User.CreatedAt = time.Now()
+	
 	err = db.C(collectionUsers).Insert(&User)
 	return
 }
