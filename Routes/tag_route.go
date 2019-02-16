@@ -24,17 +24,19 @@ type TagRoute struct {
 
 /*CreateNewTag - function for creating new Tag*/
 func (routeSetting *TagRoute) CreateNewTag(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	var tag Models.Tag
 	if err := json.NewDecoder(r.Body).Decode(&tag); err != nil {
+		r.Body.Close()
 		respondWithError(w, r, http.StatusInternalServerError, "Invalid payload")
 		return
 	}
 	if err := daoTag.InsertDb(tag); err != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "invalid opartion")
+		r.Body.Close()
+		respondWithError(w, r, http.StatusInternalServerError, "invalid insert into db")
 		return
 	}
 
+	r.Body.Close()
 	respondWithJSON(w, r, http.StatusOK, tag)
 }
 

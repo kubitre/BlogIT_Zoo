@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/kubitre/blog/Config"
-	"github.com/kubitre/blog/Logs"
 )
 
 const (
@@ -23,13 +22,13 @@ func respondWithError(w http.ResponseWriter, r *http.Request, code int, msg stri
 /*respondWithJSON - function for send packet to response in json type*/
 func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
 	if r.Header.Get("Content-Type") != "application/json" {
-		Logs.PrintRouteTrace(r, true)
+		// Logs.PrintRouteTrace(r, true)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusConflict)
 		respons, _ := json.Marshal(map[string]string{"error": "you packet in not json format! Please check you packet"})
 		w.Write(respons)
 	} else {
-		Logs.PrintRouteTrace(r, false)
+		// Logs.PrintRouteTrace(r, false)
 		response, _ := json.Marshal(payload)
 		w.Header().Set("Content-Type", "application/json")
 
