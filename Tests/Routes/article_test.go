@@ -1,34 +1,33 @@
 package Routes
 
-import (
-	"net/http"
-	"net/http/httptest"
-	"testing"
-)
+import "testing"
 
-func TestEmptyDbArticle(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/v1/articles", nil)
-	res := executeRequest(req)
-	checkResponseCode(t, http.StatusNoContent, res.Code)
-
-	if body := res.Body.String(); body != "[]" {
-		t.Errorf("Expected an empty array. Got %s", body)
-	}
+func TestEmptyDbArticle_GET(t *testing.T) {
+	ker := TestingKernel{
+		APIRoute:        "/v1/articles",
+		TypeRoute:       "articles",
+		AppSettings:     ApplicationForTesting{},
+		RequestMethod:   "GET",
+		ExpectedCode:    204,
+		ExpectedMessage: "null"}
+	ker.AppSettings.ConfigureDbConnection()
+	ker.RunTime(t, nil)
 }
 
-func executeRequest(req *http.Request) *httptest.ResponseRecorder {
-	req.Header.Add("Content-Type", "application/json")
-
-	ap := ApplicationForTesting{}
-	ap.Confugrator()
-	rr := httptest.NewRecorder()
-	ap.Router.ServeHTTP(rr, req)
-
-	return rr
-}
-
-func checkResponseCode(t *testing.T, expected, actual int) {
-	if expected != actual {
-		t.Errorf("Expected response code: %d. God %d\n", expected, actual)
+func TestArticleEmptyCreate_POST(t *testing.T) {
+	ker := TestingKernel{
+		APIRoute:        "/v1/articles",
+		TypeRoute:       "articles",
+		AppSettings:     ApplicationForTesting{},
+		RequestMethod:   "POST",
+		ExpectedCode:    500,
+		ExpectedMessage: `{"error": "Not insert to database! Please contact with administration"}`,
 	}
+	ker.AppSettings.ConfigureDbConnection()
+	ker.RunTime(t, []byte(`
+		{
+			"name": "test", 
+			"description": "test description",
+			"tags": null,
+			"author": null}`))
 }
