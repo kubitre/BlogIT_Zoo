@@ -2,9 +2,11 @@ package Routes
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/kubitre/blog/Dao"
+	mgo "gopkg.in/mgo.v2"
 
 	"github.com/kubitre/blog/Models"
 
@@ -22,7 +24,7 @@ type UserRoute struct {
 }
 
 /*CreateNewUser - function for creating new User*/
-func (routeSetting *UserRoute) CreateNewUser(w http.ResponseWriter, r *http.Request) {
+func (routeSetting *UserRoute) Create(w http.ResponseWriter, r *http.Request) {
 	// log.Println("handle create user blog")
 	defer r.Body.Close()
 	var user Models.User
@@ -48,7 +50,7 @@ func (routeSetting *UserRoute) CreateNewUser(w http.ResponseWriter, r *http.Requ
 }
 
 /*FindUserByID - function for finding User by indentificator*/
-func (routeSetting *UserRoute) FindUserByID(w http.ResponseWriter, r *http.Request) {
+func (routeSetting *UserRoute) Find(w http.ResponseWriter, r *http.Request) {
 	// log.Println("handle find user from blog by id")
 	params := mux.Vars(r)
 	user, err := routeSetting.DAO.FindByID(params["id"])
@@ -64,7 +66,7 @@ func (routeSetting *UserRoute) FindUserByID(w http.ResponseWriter, r *http.Reque
 }
 
 /*FindAllUsers - function for finding all Users in database*/
-func (routeSetting *UserRoute) FindAllUsers(w http.ResponseWriter, r *http.Request) {
+func (routeSetting *UserRoute) FindAll(w http.ResponseWriter, r *http.Request) {
 	// log.Println("handle find all users from blog")
 	users, err := routeSetting.DAO.FindAll()
 	if err != nil {
@@ -79,7 +81,7 @@ func (routeSetting *UserRoute) FindAllUsers(w http.ResponseWriter, r *http.Reque
 }
 
 /*UpdateUserByID - function for updating User by indentificator*/
-func (routeSetting *UserRoute) UpdateUserByID(w http.ResponseWriter, r *http.Request) {
+func (routeSetting *UserRoute) Update(w http.ResponseWriter, r *http.Request) {
 	// log.Println("handle update user from blog")
 	var user Models.User
 	defer r.Body.Close()
@@ -104,7 +106,7 @@ func (routeSetting *UserRoute) UpdateUserByID(w http.ResponseWriter, r *http.Req
 }
 
 /*DeleteUserByID - function for remove User by indentificator*/
-func (routeSetting *UserRoute) DeleteUserByID(w http.ResponseWriter, r *http.Request) {
+func (routeSetting *UserRoute) Remove(w http.ResponseWriter, r *http.Request) {
 	// log.Println("handle delete user from blog")
 	var user Models.User
 	defer r.Body.Close()
@@ -128,24 +130,28 @@ func (routeSetting *UserRoute) DeleteUserByID(w http.ResponseWriter, r *http.Req
 }
 
 /*Setting - настройка роутера*/
-func (rs *UserRoute) Setting(features []int) {
+func (rs *UserRoute) Setting(features []int, db *mgo.Database) {
+	rs.Routes = RouteCRUDs{
+		RouteCreate:  "/user",
+		RouteDelete:  "/users/{id}",
+		RouteFind:    "/users/{id}", //  поиск комментария по
+		RouteFindAll: "/users",
+		RouteUpdate:  "/users/{id}",
+	}
+
+	// fmt.Println("Current router: ", *rs)
+
+	var routr IRouter
+	routr = rs
+
+	rs.DAO = &Dao.SettingUser{
+		Database: db,
+	}
+
+	rs.RI.ConfigureRouterWithFeatures(routr.(IRouter), features, rs.Routes)
+
+	log.Println("User route was settinged!")
 }
-
-// /*StartSettingRouterUser - function for setting router for articles*/
-// func StartSettingRouterUser(router *mux.Router, routSetting RouteSetting, JWTMiddle Midllewares.JWTChecker) {
-
-// 	// var rout = UserRoute{
-// 	// 	Setting: routSetting,
-// 	// }
-
-// 	// router.HandleFunc(apiRouteUsers, rout.CreateNewUser).Methods("POST")
-// 	// router.HandleFunc(apiRouteUsers, rout.FindAllUsers).Methods("GET")
-// 	// router.HandleFunc(apiRouteUsers, rout.FindUserByID).Methods("GET")
-// 	// router.HandleFunc(apiRouteUsers, rout.UpdateUserByID).Methods("PUT")
-// 	// router.HandleFunc(apiRouteUsers, rout.DeleteUserByID).Methods("DELETE")
-
-// 	log.Println("routes for users was configurated")
-// }
 
 /*SetupRouterSetting - установка главного роутера приложения*/
 func (rs *UserRoute) SetupRouterSetting(rS *RouteSetting) {

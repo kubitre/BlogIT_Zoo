@@ -69,10 +69,14 @@ func main() {
 	log.Println("api was started on port: ", strconv.Itoa(app.Port))
 
 	Routes.StartModeRouters(map[int][]int{
-		0: []int{0},
-		1: []int{0, 1, 2},
-		2: []int{0, 1, 2},
-	}, app.Routers)
+		0: []int{0, 1, 2, 3, 4},
+		1: []int{0, 1, 2, 3, 4},
+		2: []int{0, 1, 2, 3, 4},
+		3: []int{0, 1, 2, 3, 4},
+		4: []int{0, 1, 2, 3, 4},
+	}, app.Routers,
+		app.Database,
+	)
 
 	if err := http.ListenAndServe(":"+strconv.Itoa(int(app.Port)), app.Routers.Router); err != nil {
 		log.Fatal(err)

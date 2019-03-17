@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	Midllewares "github.com/kubitre/blog/Middlewares"
+	mgo "gopkg.in/mgo.v2"
 
 	"github.com/gorilla/mux"
 )
@@ -37,7 +38,7 @@ type (
 
 	/*ISetting - интерфейс всех роутеров для быстрого включения\выключения какого обработчика*/
 	ISetting interface {
-		Setting([]int)
+		Setting([]int, *mgo.Database)
 		SetupRouterSetting(*RouteSetting)
 	}
 )
@@ -93,10 +94,10 @@ func CreateNewRouter(version string) *RouteSetting {
 }
 
 /*StartModeRouters - включение\отключение функционала блога на лету*/
-func StartModeRouters(numbersFeatures map[int][]int, routerSetting *RouteSetting) {
+func StartModeRouters(numbersFeatures map[int][]int, routerSetting *RouteSetting, database *mgo.Database) {
 	for indexOfFeature, RouteFeatures := range numbersFeatures {
 		features[indexOfFeature].SetupRouterSetting(routerSetting)
-		features[indexOfFeature].Setting(RouteFeatures)
+		features[indexOfFeature].Setting(RouteFeatures, database)
 	}
 
 	routerSetting.Setting()

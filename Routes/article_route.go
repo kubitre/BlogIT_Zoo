@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	mgo "gopkg.in/mgo.v2"
+
 	"github.com/gorilla/mux"
 	"github.com/kubitre/blog/Dao"
 	"github.com/kubitre/blog/Models"
@@ -116,13 +118,17 @@ func (rs *ArticleRoute) Remove(w http.ResponseWriter, r *http.Request) {
 }
 
 /*Setting - function for setting router for articles*/
-func (rs *ArticleRoute) Setting(fetures []int) {
+func (rs *ArticleRoute) Setting(fetures []int, db *mgo.Database) {
 	rs.Routes = RouteCRUDs{
 		RouteCreate:  "/article",
 		RouteDelete:  "/articles/{id}",
 		RouteFind:    "/articles/{id}",
 		RouteFindAll: "/articles",
 		RouteUpdate:  "/articles/{id}",
+	}
+
+	rs.DAO = &Dao.SettingArticle{
+		Database: db,
 	}
 
 	// fmt.Println("Current router: ", *rs)

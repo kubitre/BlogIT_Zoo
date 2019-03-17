@@ -1,8 +1,11 @@
 package Routes
 
 import (
+	"log"
+
 	"github.com/kubitre/blog/Dao"
 	"github.com/kubitre/blog/Models"
+	mgo "gopkg.in/mgo.v2"
 )
 
 /*TokenRoute - it is structure which contain info about errors and contain routing handlers*/
@@ -35,7 +38,27 @@ func (t *TokenRoute) UpdateToken() (Models.Token, error) {
 	return Models.Token{}, nil
 }
 
-func (rs *TokenRoute) Setting(features []int) {
+func (rs *TokenRoute) Setting(features []int, db *mgo.Database) {
+	rs.Routes = RouteCRUDs{
+		RouteCreate: "/token",
+		// RouteDelete: "/comments/{id}",
+		RouteFind: "/token/{id}", //  поиск комментария по
+		// RouteFindAll: "/comments/{id}",
+		// RouteUpdate: "/comments/{id}",
+	}
+
+	// fmt.Println("Current router: ", *rs)
+
+	rs.DAO = &Dao.TokenDao{
+		Database: db,
+	}
+
+	var routr IRouter
+	routr = rs
+
+	rs.RI.ConfigureRouterWithFeatures(routr.(IRouter), features, rs.Routes)
+
+	log.Println("Token route was settinged!")
 }
 
 // /*StartSettingRouterToken - настройка роутера для токенов*/

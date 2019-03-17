@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kubitre/blog/Dao"
 	"github.com/kubitre/blog/Models"
+	mgo "gopkg.in/mgo.v2"
 )
 
 /*CommentsRoute - Structure for route emdedeed*/
@@ -133,7 +134,26 @@ func (rs *CommentsRoute) Remove(w http.ResponseWriter, r *http.Request) {
 // }
 
 /*Setting - настроечный интерфейс*/
-func (rs *CommentsRoute) Setting(features []int) {
+func (rs *CommentsRoute) Setting(features []int, db *mgo.Database) {
+	rs.Routes = RouteCRUDs{
+		RouteCreate:  "/comment",
+		RouteDelete:  "/comments/{id}",
+		RouteFind:    "/comments/{id}", //  поиск комментария по
+		RouteFindAll: "/comments/{id}",
+		RouteUpdate:  "/comments/{id}",
+	}
+
+	// fmt.Println("Current router: ", *rs)
+
+	rs.DAO = &Dao.SettingComment{
+		Database: db,
+	}
+
+	var routr IRouter
+	routr = rs
+
+	rs.RI.ConfigureRouterWithFeatures(routr.(IRouter), features, rs.Routes)
+
 	log.Println("Comment route was settinged!")
 }
 

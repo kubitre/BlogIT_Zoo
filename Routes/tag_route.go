@@ -2,19 +2,15 @@ package Routes
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/kubitre/blog/Dao"
+	mgo "gopkg.in/mgo.v2"
 
 	"github.com/gorilla/mux"
 	"github.com/kubitre/blog/Models"
 )
-
-const (
-	apiRouteTag = "/v1/tags"
-)
-
-var daoTag = Dao.SettingTag{}
 
 /*TagRoute - Structure for route emdedeed*/
 type TagRoute struct {
@@ -27,103 +23,103 @@ type TagRoute struct {
 }
 
 /*Create - function for creating new Tag*/
-func (routeSetting *TagRoute) Create(w http.ResponseWriter, r *http.Request) {
+func (rs *TagRoute) Create(w http.ResponseWriter, r *http.Request) {
 	var tag Models.Tag
 	if err := json.NewDecoder(r.Body).Decode(&tag); err != nil {
 		r.Body.Close()
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "Invalid payload",
 			"errorCode": err.Error(),
 		})
 		return
 	}
-	tagInserted, err := daoTag.InsertDb(tag)
+	tagInserted, err := rs.DAO.InsertDb(tag)
 	if err != nil {
 		r.Body.Close()
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{"error": "invalid insert into db", "errorCode": err.Error()})
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{"error": "invalid insert into db", "errorCode": err.Error()})
 		return
 	}
 
 	r.Body.Close()
-	routeSetting.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, tagInserted)
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, tagInserted)
 }
 
 /*Find - function for finding Tag by indentificator*/
-func (routeSetting *TagRoute) Find(w http.ResponseWriter, r *http.Request) {
+func (rs *TagRoute) Find(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	tag, err := daoTag.FindByID(params["id"])
+	tag, err := rs.DAO.FindByID(params["id"])
 	if err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusExpectationFailed, map[string]string{
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusExpectationFailed, map[string]string{
 			"error":     "Invalid payload!",
 			"errorCode": err.Error(),
 		})
 		return
 	}
-	routeSetting.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, tag)
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, tag)
 }
 
 /*FindAll - function for finding all tags in database*/
-func (routeSetting *TagRoute) FindAll(w http.ResponseWriter, r *http.Request) {
-	tags, err := daoTag.FindAll()
+func (rs *TagRoute) FindAll(w http.ResponseWriter, r *http.Request) {
+	tags, err := rs.DAO.FindAll()
 	if err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "invalid operations",
 			"errorCode": err.Error(),
 		})
 		return
 	}
-	routeSetting.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, tags)
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, tags)
 }
 
 /*Update - function for updating tag by indentificator*/
-func (routeSetting *TagRoute) Update(w http.ResponseWriter, r *http.Request) {
+func (rs *TagRoute) Update(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var tag Models.Tag
 	if err := json.NewDecoder(r.Body).Decode(&tag); err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "Invalid payload!",
 			"errorCode": err.Error(),
 		})
 		return
 	}
 
-	if err := daoTag.Update(tag); err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+	if err := rs.DAO.Update(tag); err != nil {
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "invalid operations",
 			"errorCode": err.Error(),
 		})
 		return
 	}
-	routeSetting.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, "success update object")
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, "success update object")
 }
 
 /*Remove - function for remove tag by indentificator*/
-func (routeSetting *TagRoute) Remove(w http.ResponseWriter, r *http.Request) {
+func (rs *TagRoute) Remove(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var tag Models.Tag
 	if err := json.NewDecoder(r.Body).Decode(&tag); err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "Invalid payload!",
 			"errorCode": err.Error(),
 		})
 		return
 	}
-	if err := daoTag.Delete(tag); err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+	if err := rs.DAO.Delete(tag); err != nil {
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "invalid operations",
 			"errorCode": err.Error(),
 		})
 		return
 	}
 
-	routeSetting.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string]string{
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string]string{
 		"status": "delete was complete",
 		"code":   "test",
 	})
 }
 
 // /*StartSettingRouterTag - function for setting router for articles*/
-// func StartSettingRouterTag(router *mux.Router, routSetting RouteSetting, JWTMiddle Midllewares.JWTChecker) {
+// func StartSettingRouterTag(router *mux.Router, routSetting rs, JWTMiddle Midllewares.JWTChecker) {
 
 // 	var rout = TagRoute{}
 
@@ -136,7 +132,27 @@ func (routeSetting *TagRoute) Remove(w http.ResponseWriter, r *http.Request) {
 // 	log.Println("routes for tags was configurated")
 // }
 
-func (rs *TagRoute) Setting(features []int) {
+func (rs *TagRoute) Setting(features []int, db *mgo.Database) {
+	rs.Routes = RouteCRUDs{
+		RouteCreate:  "/tag",
+		RouteDelete:  "/tag/{id}",
+		RouteFind:    "/tags/{id}", //  поиск комментария по
+		RouteFindAll: "/tags",
+		RouteUpdate:  "/tags/{id}",
+	}
+
+	// fmt.Println("Current router: ", *rs)
+
+	rs.DAO = &Dao.SettingTag{
+		Database: db,
+	}
+
+	var routr IRouter
+	routr = rs
+
+	rs.RI.ConfigureRouterWithFeatures(routr.(IRouter), features, rs.Routes)
+
+	log.Println("Tag route was settinged!")
 }
 
 /*SetupRouterSetting - установка главного роутера приложения*/
