@@ -5,101 +5,139 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kubitre/blog/Dao"
-
 	"github.com/gorilla/mux"
+	"github.com/kubitre/blog/Dao"
 	"github.com/kubitre/blog/Models"
 )
 
-const (
-	apiRouteComments = "/v1/comments"
-)
-
-var daoComment = Dao.SettingComment{}
-
 /*CommentsRoute - Structure for route emdedeed*/
 type CommentsRoute struct {
-	ErrorsCounts int32
+	Routes RouteCRUDs
+	RI     *RouteSetting
+	DAO    *Dao.SettingComment
+
+	IRouter
+	ISetting
 }
 
-/*CreateNewComment - function for creating new comment*/
-func (routeSetting *CommentsRoute) CreateNewComment(w http.ResponseWriter, r *http.Request) {
+/*Create - function for creating new comment*/
+func (rs *CommentsRoute) Create(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var comment Models.Comment
 	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "Invalid payload!")
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+			"error":     "invalid paylaod",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	erra := daoComment.InsertDb(comment)
+	newcomment, erra := rs.DAO.InsertDb(comment)
 	if erra != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "error create new comment")
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+			"error":     "does not created new comment!",
+			"errorCode": erra.Error(),
+		})
 		return
 	}
-	respondWithJSON(w, r, http.StatusOK, comment)
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, newcomment)
 }
 
-/*FindCommentByID - function for finding comment by indentificator*/
-func (routeSetting *CommentsRoute) FindCommentByID(w http.ResponseWriter, r *http.Request) {
+/*Find - function for finding comment by indentificator*/
+func (rs *CommentsRoute) Find(w http.ResponseWriter, r *http.Request) {
 	var params = mux.Vars(r)
-	comment, err := daoComment.FindByID(params["id"])
+	comment, err := rs.DAO.FindByID(params["id"])
 	if err != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "invalid payload")
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+			"error":     "invalid payload",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	respondWithJSON(w, r, http.StatusOK, comment)
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, comment)
 }
 
-/*FindAllComments - function for finding all comments in database*/
-func (routeSetting *CommentsRoute) FindAllComments(w http.ResponseWriter, r *http.Request) {
-	comments, err := daoComment.FindAll()
+/*FindAll - function for finding all comments in database*/
+func (rs *CommentsRoute) FindAll(w http.ResponseWriter, r *http.Request) {
+	comments, err := rs.DAO.FindAll()
 	if err != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "invalid operation")
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+			"error":     "invalid operation",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	respondWithJSON(w, r, http.StatusOK, comments)
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, comments)
 }
 
-/*UpdateCommentByID - function for updating comment by indentificator*/
-func (routeSetting *CommentsRoute) UpdateCommentByID(w http.ResponseWriter, r *http.Request) {
+/*Update - function for updating comment by indentificator*/
+func (rs *CommentsRoute) Update(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var comment Models.Comment
 	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-		respondWithError(w, r, http.StatusExpectationFailed, "Invalid payload!")
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusExpectationFailed, map[string]string{
+			"error":     "Invalid payload!",
+			"errorCode": err.Error(),
+		})
 		return
 	}
 
-	if err := daoComment.Update(comment); err != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "Invalid operation")
+	if err := rs.DAO.Update(comment); err != nil {
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+			"error":     "Invalid operation",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	respondWithJSON(w, r, http.StatusOK, "success update")
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string]string{
+		"status": "success update",
+		"code":   "test",
+	})
 }
 
-/*DeleteCommentByID - function for remove comment by indentificator*/
-func (routeSetting *CommentsRoute) DeleteCommentByID(w http.ResponseWriter, r *http.Request) {
+/*Remove - function for remove comment by indentificator*/
+func (rs *CommentsRoute) Remove(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var comment Models.Comment
 	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-		respondWithError(w, r, http.StatusExpectationFailed, "Invalid payload")
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusExpectationFailed, map[string]string{
+			"error":     "Invalid payload",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	if err := daoComment.Delete(comment); err != nil {
-		respondWithError(w, r, http.StatusExpectationFailed, "error delete object")
+	if err := rs.DAO.Delete(comment); err != nil {
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusExpectationFailed, map[string]string{
+			"error":     "error delete object",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	respondWithJSON(w, r, http.StatusOK, "success delete object")
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string]string{
+		"status": "success delete object",
+		"code":   "test",
+	})
 }
 
-/*StartSettingRouterComment - function for setting router for articles*/
-func StartSettingRouterComment(router *mux.Router) {
+// /*StartSettingRouterComment - function for setting router for articles*/
+// func (rs *CommentsRoute) StartSettingRouterComment(router *mux.Router) *mux.Router {
 
-	var rout = CommentsRoute{}
+// 	// router.HandleFunc(rs.APIRoute, rs.CreateNewComment).Methods("POST")
+// 	// router.HandleFunc(rs.APIRoute, rs.FindAllComments).Methods("GET")
+// 	// router.HandleFunc(rs.APIRoute, rs.FindCommentByID).Methods("GET")
+// 	// router.HandleFunc(rs.APIRoute, rs.UpdateCommentByID).Methods("PUT")
+// 	// router.HandleFunc(rs.APIRoute, rs.DeleteCommentByID).Methods("DELETE")
 
-	router.HandleFunc(apiRouteComments, rout.CreateNewComment).Methods("POST")
-	router.HandleFunc(apiRouteComments, rout.FindAllComments).Methods("GET")
-	router.HandleFunc(apiRouteComments, rout.FindCommentByID).Methods("GET")
-	router.HandleFunc(apiRouteComments, rout.UpdateCommentByID).Methods("PUT")
-	router.HandleFunc(apiRouteComments, rout.DeleteCommentByID).Methods("DELETE")
+// 	log.Println("router for comments was configurated")
 
-	log.Println("router for comments was configurated")
+// 	return router
+// }
+
+/*Setting - настроечный интерфейс*/
+func (rs *CommentsRoute) Setting(features []int) {
+	log.Println("Comment route was settinged!")
+}
+
+/*SetupRouterSetting - установка главного роутера приложения*/
+func (rs *CommentsRoute) SetupRouterSetting(rS *RouteSetting) {
+	rs.RI = rS
 }

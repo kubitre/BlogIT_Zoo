@@ -1,14 +1,20 @@
 package Models
 
 import (
+	"time"
+
 	"gopkg.in/mgo.v2/bson"
 )
 
 /*Article type for all layers*/
 type Article struct {
-	ID          bson.ObjectId `bson:"_id" json:"id"`
-	Name        string        `bson:"name" json:"name"`
-	Description string        `bson:"description" json:"description"`
-	Tags        []*Tag        `bson:"tags" json:"tags"`
-	Autor       *User         `bson:"author" json:"author"`
+	ID          bson.ObjectId `bson:"_id" json:"id"`                  // идентификатор статьи в бд
+	Name        string        `bson:"name" json:"name"`               // навзание статьи
+	Description string        `bson:"description" json:"description"` // описание статьи (неполноая статья)
+	Body        string        `bson:"body" json:"body"`               // основное содержание статьи
+	TagsIDs     []string      `bson:"-" json:"id_tags"`               // идентификаторы тегов
+	Tags        []Tag         `bson:"tags" json:"tags"`               // теги
+	Autor       *User         `bson:"author" json:"author"`           // автор статьи
+	AuthorID    string        `bson:"-" json:"id_author"`             // идентификатор автора статьи
+	CreatedAt   time.Time     `bson:"createdat" json:"createdat"`     // дата и время создания статьи
 }

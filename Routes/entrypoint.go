@@ -1,88 +1,126 @@
 package Routes
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
 
+	Midllewares "github.com/kubitre/blog/Middlewares"
+
 	"github.com/gorilla/mux"
-
-	"github.com/kubitre/blog/Config"
 )
 
-const (
-	addr = ":9512"
-)
-
-/*respondWithError - function for send error*/
-func respondWithError(w http.ResponseWriter, r *http.Request, code int, msg string) {
-	respondWithJSON(w, r, code, map[string]string{"error": msg})
-}
-
-/*respondWithJSON - function for send packet to response in json type*/
-func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
-	if r.Header.Get("Content-Type") != "application/json" {
-		// Logs.PrintRouteTrace(r, true)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusConflict)
-		respons, _ := json.Marshal(map[string]string{"error": "you packet in not json format! Please check you packet"})
-		w.Write(respons)
-	} else {
-		// Logs.PrintRouteTrace(r, false)
-		response, _ := json.Marshal(payload)
-		w.Header().Set("Content-Type", "application/json")
-
-		w.WriteHeader(code)
-		w.Write(response)
+type (
+	/*RouteSetting - Main route layer for settings all routes*/
+	RouteSetting struct {
+		APIVersion    string                  // версия api
+		Responser     *Midllewares.Responser  // мидлварь
+		SecurityLayer *Midllewares.JWTChecker // мидлварь
+		Router        *mux.Router             // основной роутер приложения
 	}
-}
 
-/*RouteSetting - Main route layer for settings all routes*/
-type RouteSetting struct {
-	apiVersion string
-}
+	/*RouteCRUDs - список роутов до основных операций crud на каждый маршрут*/
+	RouteCRUDs struct {
+		RouteCreate  string
+		RouteUpdate  string
+		RouteDelete  string
+		RouteFind    string
+		RouteFindAll string
+	}
 
-const (
-	apiRouteMain = "/v"
-	version      = "1"
+	/*IRouter - основной crud всех роутеров*/
+	IRouter interface {
+		Create(w http.ResponseWriter, r *http.Request)
+		Update(w http.ResponseWriter, r *http.Request)
+		Remove(w http.ResponseWriter, r *http.Request)
+		Find(w http.ResponseWriter, r *http.Request)
+		FindAll(w http.ResponseWriter, r *http.Request)
+	}
+
+	/*ISetting - интерфейс всех роутеров для быстрого включения\выключения какого обработчика*/
+	ISetting interface {
+		Setting([]int)
+		SetupRouterSetting(*RouteSetting)
+	}
+)
+
+var (
+	features = map[int]ISetting{
+		0: &ArticleRoute{},
+		1: &CommentsRoute{},
+		2: &TagRoute{},
+		3: &TokenRoute{},
+		4: &UserRoute{},
+	}
 )
 
 /*GetVersion - function for getting version of api*/
-func (routesetting *RouteSetting) GetVersion(w http.ResponseWriter, r *http.Request) {
-	respondWithJSON(w, r, http.StatusOK, map[string]string{"version": "0.1"})
+func (rs *RouteSetting) GetVersion(w http.ResponseWriter, r *http.Request) {
+
+	rs.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string]string{"version": "0.1"})
 }
 
 /*GetStatus - function for getting status on backend*/
-func (routesetting *RouteSetting) GetStatus(w http.ResponseWriter, r *http.Request) {
-	respondWithJSON(w, r, http.StatusOK, map[string]string{"current_status": "dev"})
+func (rs *RouteSetting) GetStatus(w http.ResponseWriter, r *http.Request) {
+	rs.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string]string{"current_status": "dev"})
 }
 
 /*GetAvailableFormats - function for getting available formats to response type*/
-func (routsetting *RouteSetting) GetAvailableFormats(w http.ResponseWriter, r *http.Request) {
-	respondWithJSON(w, r, http.StatusOK, map[string][]string{"available formats": []string{"application/json", "application/xml"}})
+func (rs *RouteSetting) GetAvailableFormats(w http.ResponseWriter, r *http.Request) {
+	rs.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string][]string{"available formats": []string{"application/json", "application/xml"}})
 }
 
-/*StartSettingRoutes - function for settings database and routes*/
-func StartSettingRoutes(config Config.Configuration, flagTest bool) *mux.Router {
-	router := mux.NewRouter()
-	routSetting := RouteSetting{}
+/*Setting - function for settings database and routes*/
+func (rs *RouteSetting) Setting() {
 
-	StartSettingRouterArticle(router)
-	StartSettingRouterComment(router)
-	StartSettingRouterTag(router)
-	StartSettingRouterUser(router)
+	rs.Router.HandleFunc(rs.APIVersion+"/ver", rs.GetVersion).Methods("GET")
+	rs.Router.HandleFunc(rs.APIVersion+"/status", rs.GetStatus).Methods("GET")
+	rs.Router.HandleFunc(rs.APIVersion+"/available", rs.GetAvailableFormats).Methods("GET")
+	rs.Router.NotFoundHandler = http.HandlerFunc(Midllewares.NotFound)
+	rs.Router.MethodNotAllowedHandler = http.HandlerFunc(Midllewares.NotAllowed)
+}
 
-	router.HandleFunc(apiRouteMain+version+"/ver", routSetting.GetVersion).Methods("GET")
-	router.HandleFunc(apiRouteMain+version+"/status", routSetting.GetStatus).Methods("GET")
-	router.HandleFunc(apiRouteMain+version+"/available", routSetting.GetAvailableFormats).Methods("GET")
-
-	if flagTest {
-		return router
+/*CreateNewRouter - создание нового роутера*/
+func CreateNewRouter(version string) *RouteSetting {
+	rs := &RouteSetting{
+		Responser: &Midllewares.Responser{
+			Error: false,
+		},
+		APIVersion:    version,
+		SecurityLayer: &Midllewares.JWTChecker{},
+		Router:        mux.NewRouter(),
 	}
 
-	if err := http.ListenAndServe(addr, router); err != nil {
-		log.Fatal(err)
+	return rs
+}
+
+/*StartModeRouters - включение\отключение функционала блога на лету*/
+func StartModeRouters(numbersFeatures map[int][]int, routerSetting *RouteSetting) {
+	for indexOfFeature, RouteFeatures := range numbersFeatures {
+		features[indexOfFeature].SetupRouterSetting(routerSetting)
+		features[indexOfFeature].Setting(RouteFeatures)
 	}
 
-	return router
+	routerSetting.Setting()
+}
+
+/*ConfigureRouterWithFeatures - конфигурация основного роутера с фичами features*/
+func (rs *RouteSetting) ConfigureRouterWithFeatures(router IRouter, features []int, routes RouteCRUDs) {
+	for _, feature := range features {
+		switch feature {
+		case 0:
+			rs.Router.HandleFunc(rs.APIVersion+routes.RouteCreate, router.Create).Methods("POST")
+			break
+		case 1:
+			rs.Router.HandleFunc(rs.APIVersion+routes.RouteFind, router.Find).Methods("GET")
+			break
+		case 2:
+			rs.Router.HandleFunc(rs.APIVersion+routes.RouteFindAll, router.FindAll).Methods("GET")
+			break
+		case 3:
+			rs.Router.HandleFunc(rs.APIVersion+routes.RouteUpdate, router.Update).Methods("PUT")
+			break
+		case 4:
+			rs.Router.HandleFunc(rs.APIVersion+routes.RouteDelete, router.Remove).Methods("DELETE")
+			break
+		}
+	}
 }

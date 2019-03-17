@@ -12,8 +12,10 @@ type Configuration struct {
 	Database string
 }
 
-func (c *Configuration) Read() {
+func (c *Configuration) Read() error {
 	if _, err := toml.DecodeFile("config.toml", &c); err != nil {
 		log.Fatal(err)
+		return err
 	}
+	return nil
 }

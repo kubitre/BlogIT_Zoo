@@ -11,9 +11,8 @@ import (
 type SettingDao struct {
 	Server   string
 	Database string
+	Db       *mgo.Database
 }
-
-var db *mgo.Database
 
 /*Connect - function for connection to database server*/
 func (m *SettingDao) Connect() {
@@ -22,5 +21,5 @@ func (m *SettingDao) Connect() {
 		log.Fatal(err)
 	}
 
-	db = session.DB(m.Database)
+	m.Db = session.DB(m.Database)
 }

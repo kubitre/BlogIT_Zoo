@@ -10,95 +10,132 @@ import (
 	"github.com/kubitre/blog/Models"
 )
 
-const (
-	apiRoutearticle = "/v1/articles"
-)
-
-var dao = Dao.SettingArticle{}
-
 /*ArticleRoute - Structure for route emdedeed*/
 type ArticleRoute struct {
-	ErrorsCounts int32
+	Routes RouteCRUDs          // основные маршруты до хэндлеров CRUD
+	RI     *RouteSetting       // основная сущность маршрута
+	DAO    *Dao.SettingArticle // DAO слой
+
+	IRouter // основные хэндлеры маршрута
+	ISetting
 }
 
-/*CreateNewArticle - function for creating new article*/
-func (routeSetting *ArticleRoute) CreateNewArticle(w http.ResponseWriter, r *http.Request) {
+/*CreateArticle - function for creating new article*/
+func (rs *ArticleRoute) Create(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var article Models.Article
 
 	if err := json.NewDecoder(r.Body).Decode(&article); err != nil {
-		respondWithError(w, r, http.StatusExpectationFailed, "Invalid request payload!")
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusExpectationFailed, map[string]string{
+			"error":     "Invalid request payload!",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	artic, err := dao.InsertDb(article)
+	artic, err := rs.DAO.InsertDb(article)
 	if err != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "Not insert to database! Please contact with adminitstration")
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+			"error":     "Not insert to database! Please contact with adminitstration",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	respondWithJSON(w, r, http.StatusOK, artic)
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, artic)
 }
 
-/*FindArticleByID - function for finding article by indentificator*/
-func (routeSetting *ArticleRoute) FindArticleByID(w http.ResponseWriter, r *http.Request) {
+/*Find - function for finding article by indentificator*/
+func (rs *ArticleRoute) Find(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	artic, err := dao.FindByID(params["id"])
+	artic, err := rs.DAO.FindByID(params["id"])
 	if err != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "Invalid indentificator or not exist! please check you id")
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+			"error":     "Invalid indentificator or not exist! please check you id",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	respondWithJSON(w, r, http.StatusOK, artic)
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, artic)
 }
 
-/*FindAllArticles - function for finding all articles in database*/
-func (routeSetting *ArticleRoute) FindAllArticles(w http.ResponseWriter, r *http.Request) {
-	articles, err := dao.FindAll()
+/*FindAll - function for finding all articles in database*/
+func (rs *ArticleRoute) FindAll(w http.ResponseWriter, r *http.Request) {
+	articles, err := rs.DAO.FindAll()
 	if err != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "Internal server error")
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+			"error":     "invalid payload",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	respondWithJSON(w, r, http.StatusNoContent, articles)
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusNoContent, articles)
 }
 
-/*UpdateArticleByID - function for updating article by indentificator*/
-func (routeSetting *ArticleRoute) UpdateArticleByID(w http.ResponseWriter, r *http.Request) {
+/*Update - function for updating article by indentificator*/
+func (rs *ArticleRoute) Update(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var artic Models.Article
 	if err := json.NewDecoder(r.Body).Decode(&artic); err != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "Invalid payload!")
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+			"error":     "Invalid payload!",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	if err := dao.Update(artic); err != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "Invalid update!")
+	if err := rs.DAO.Update(artic); err != nil {
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+			"error":     "Invalid update!",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	respondWithJSON(w, r, http.StatusOK, "article was updated!")
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string]string{
+		"status": "article was updated!",
+		"code":   "test",
+	})
 }
 
-/*DeleteArticleByID - function for remove article by indentificator*/
-func (routeSetting *ArticleRoute) DeleteArticleByID(w http.ResponseWriter, r *http.Request) {
+/*Remove - function for remove article by indentificator*/
+func (rs *ArticleRoute) Remove(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var artic Models.Article
 	if err := json.NewDecoder(r.Body).Decode(&artic); err != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "invalid payload")
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+			"error":     "invalid payload",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	if err := dao.Delete(artic); err != nil {
-		respondWithError(w, r, http.StatusInternalServerError, "Invalid delete object")
+	if err := rs.DAO.Delete(artic); err != nil {
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+			"error":     "Invalid delete object",
+			"errorCode": err.Error(),
+		})
 		return
 	}
-	respondWithJSON(w, r, http.StatusOK, "delete was complete")
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, "delete was complete")
 }
 
-/*StartSettingRouterArticle - function for setting router for articles*/
-func StartSettingRouterArticle(router *mux.Router) {
+/*Setting - function for setting router for articles*/
+func (rs *ArticleRoute) Setting(fetures []int) {
+	rs.Routes = RouteCRUDs{
+		RouteCreate:  "/article",
+		RouteDelete:  "/articles/{id}",
+		RouteFind:    "/articles/{id}",
+		RouteFindAll: "/articles",
+		RouteUpdate:  "/articles/{id}",
+	}
 
-	var rout = ArticleRoute{}
+	// fmt.Println("Current router: ", *rs)
 
-	router.HandleFunc(apiRoutearticle, rout.CreateNewArticle).Methods("POST")
-	router.HandleFunc(apiRoutearticle, rout.FindAllArticles).Methods("GET")
-	router.HandleFunc(apiRoutearticle, rout.FindArticleByID).Methods("GET")
-	router.HandleFunc(apiRoutearticle, rout.UpdateArticleByID).Methods("PUT")
-	router.HandleFunc(apiRoutearticle, rout.DeleteArticleByID).Methods("DELETE")
+	var routr IRouter
+	routr = rs
+
+	rs.RI.ConfigureRouterWithFeatures(routr.(IRouter), fetures, rs.Routes)
 
 	log.Println("routes for articles was configurated")
+}
+
+/*SetupRouterSetting - установка главного роутера приложения*/
+func (rs *ArticleRoute) SetupRouterSetting(rS *RouteSetting) {
+	rs.RI = rS
 }
