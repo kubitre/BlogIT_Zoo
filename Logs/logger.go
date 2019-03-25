@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/fatih/color"
 )
@@ -12,10 +13,16 @@ import (
 func PrintRouteTrace(r *http.Request, flagError bool) {
 	defer r.Body.Close()
 	body, _ := ioutil.ReadAll(r.Body)
+
+	fmt.Printf("%d-%02d-%02dT%02d:%02d:%02d-00:00 ",
+		time.Now().Year(), time.Now().Month(), time.Now().Day(),
+		time.Now().Hour(), time.Now().Minute(), time.Now().Second())
+
 	printMethodType(r.Method, flagError)
 	printAPIRoute(r.RequestURI, flagError)
 	printRequestContentType(r.Header.Get("Content-Type"), flagError)
 	printBodyRequest(string(body), flagError)
+
 	fmt.Println("")
 }
 
