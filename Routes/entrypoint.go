@@ -3,7 +3,8 @@ package Routes
 import (
 	"net/http"
 
-	Midllewares "github.com/kubitre/blog/Middlewares"
+	"github.com/kubitre/blog/Dao"
+	. "github.com/kubitre/blog/Middlewares"
 	mgo "gopkg.in/mgo.v2"
 
 	"github.com/gorilla/mux"
@@ -12,10 +13,10 @@ import (
 type (
 	/*RouteSetting - Main route layer for settings all routes*/
 	RouteSetting struct {
-		APIVersion    string                  // версия api
-		Responser     *Midllewares.Responser  // мидлварь
-		SecurityLayer *Midllewares.JWTChecker // мидлварь
-		Router        *mux.Router             // основной роутер приложения
+		APIVersion    string      // версия api
+		Responser     *Responser  // мидлварь
+		SecurityLayer *JWTChecker // мидлварь
+		Router        *mux.Router // основной роутер приложения
 	}
 
 	/*RouteCRUDs - список роутов до основных операций crud на каждый маршрут*/
@@ -38,19 +39,29 @@ type (
 
 	/*ISetting - интерфейс всех роутеров для быстрого включения\выключения какого обработчика*/
 	ISetting interface {
-		Setting([]int, *mgo.Database)
+		Setting(map[MiddleWare][]Permission, *mgo.Database)
 		SetupRouterSetting(*RouteSetting)
 	}
+
+	/*Permission - право*/
+	Permission int
+
+	/*Features - фича*/
+	Features int
+
+	/*MiddleWare - прослойка*/
+	MiddleWare int
 )
 
 var (
-	features = map[int]ISetting{
-		0: &ArticleRoute{},
-		1: &CommentsRoute{},
-		2: &TagRoute{},
-		3: &TokenRoute{},
-		4: &UserRoute{},
+	features = map[Features]ISetting{
+		Article: &ArticleRoute{},
+		Comment: &CommentsRoute{},
+		Tag:     &TagRoute{},
+		Token:   &TokenRoute{},
+		User:    &UserRoute{},
 	}
+	lr *LoginRoute = nil
 )
 
 /*GetVersion - function for getting version of api*/
@@ -70,56 +81,106 @@ func (rs *RouteSetting) GetAvailableFormats(w http.ResponseWriter, r *http.Reque
 }
 
 /*Setting - function for settings database and routes*/
-func (rs *RouteSetting) Setting() {
+func (rs *RouteSetting) Setting(db *mgo.Database) {
 
 	rs.Router.HandleFunc(rs.APIVersion+"/ver", rs.GetVersion).Methods("GET")
 	rs.Router.HandleFunc(rs.APIVersion+"/status", rs.GetStatus).Methods("GET")
 	rs.Router.HandleFunc(rs.APIVersion+"/available", rs.GetAvailableFormats).Methods("GET")
-	rs.Router.NotFoundHandler = http.HandlerFunc(Midllewares.NotFound)
-	rs.Router.MethodNotAllowedHandler = http.HandlerFunc(Midllewares.NotAllowed)
+
+	rs.Router.NotFoundHandler = http.HandlerFunc(NotFound)
+	rs.Router.MethodNotAllowedHandler = http.HandlerFunc(NotAllowed)
+
+	lr := LoginRoute{}
+	lr.Setting(nil)
+	lr.SetupRouterSetting(rs)
+	lr.SetupDaos(db)
+
+	rs.Router.HandleFunc(rs.APIVersion+lr.Routes.RouteCreate, lr.Authentication).Methods("POST")
+	rs.Router.HandleFunc(rs.APIVersion+lr.Routes.RouteDelete, lr.Logout).Methods("DELETE")
 }
 
 /*CreateNewRouter - создание нового роутера*/
-func CreateNewRouter(version string) *RouteSetting {
+func CreateNewRouter(version string, database *mgo.Database) *RouteSetting {
 	rs := &RouteSetting{
-		Responser: &Midllewares.Responser{
+		Responser: &Responser{
 			Error: false,
 		},
 		APIVersion:    version,
-		SecurityLayer: &Midllewares.JWTChecker{},
+		SecurityLayer: &JWTChecker{},
 		Router:        mux.NewRouter(),
+	}
+
+	rs.SecurityLayer.DaoToken = &Dao.TokenDao{
+		Database: database,
 	}
 
 	return rs
 }
 
 /*StartModeRouters - включение\отключение функционала блога на лету*/
-func StartModeRouters(numbersFeatures map[int][]int, routerSetting *RouteSetting, database *mgo.Database) {
+func StartModeRouters(numbersFeatures map[Features]map[MiddleWare][]Permission, routerSetting *RouteSetting, database *mgo.Database) {
 	for indexOfFeature, RouteFeatures := range numbersFeatures {
 		features[indexOfFeature].SetupRouterSetting(routerSetting)
 		features[indexOfFeature].Setting(RouteFeatures, database)
 	}
 
-	routerSetting.Setting()
+	routerSetting.Setting(database)
 }
 
-/*ConfigureRouterWithFeatures - конфигурация основного роутера с фичами features*/
-func (rs *RouteSetting) ConfigureRouterWithFeatures(router IRouter, features []int, routes RouteCRUDs) {
+/*ConfigureMiddlewaresWithFeatures - конфигурация прослоек middleware*/
+func (rs *RouteSetting) ConfigureMiddlewaresWithFeatures(router IRouter, middlewares map[MiddleWare][]Permission, routes RouteCRUDs) {
+	for index, middleware := range middlewares {
+		switch index {
+		case Auth:
+			rs.ConfigureAuthWithFeatures(router, middleware, routes)
+			break
+		case Routes:
+			rs.ConfigureRoutesWithFeatures(router, middleware, routes)
+			break
+		}
+	}
+}
+
+/*ConfigureAuthWithFeatures - конфигурирование прослойки Auth*/
+func (rs *RouteSetting) ConfigureAuthWithFeatures(router IRouter, features []Permission, routes RouteCRUDs) {
 	for _, feature := range features {
 		switch feature {
-		case 0:
+		case Create:
+			rs.Router.HandleFunc(rs.APIVersion+routes.RouteCreate, rs.SecurityLayer.JWTCMiddleware(router.Create)).Methods("POST")
+			break
+		case Read:
+			rs.Router.HandleFunc(rs.APIVersion+routes.RouteFind, rs.SecurityLayer.JWTCMiddleware(router.Find)).Methods("GET")
+			break
+		case ReadAll:
+			rs.Router.HandleFunc(rs.APIVersion+routes.RouteFindAll, rs.SecurityLayer.JWTCMiddleware(router.FindAll)).Methods("GET")
+			break
+		case Update:
+			rs.Router.HandleFunc(rs.APIVersion+routes.RouteUpdate, rs.SecurityLayer.JWTCMiddleware(router.Update)).Methods("PUT")
+			break
+		case Remove:
+			rs.Router.HandleFunc(rs.APIVersion+routes.RouteDelete, rs.SecurityLayer.JWTCMiddleware(router.Remove)).Methods("DELETE")
+			break
+		}
+	}
+}
+
+/*ConfigureRoutesWithFeatures - конфигрурирование роутеров*/
+func (rs *RouteSetting) ConfigureRoutesWithFeatures(router IRouter, features []Permission, routes RouteCRUDs) {
+	for _, feature := range features {
+		switch feature {
+		case Create:
 			rs.Router.HandleFunc(rs.APIVersion+routes.RouteCreate, router.Create).Methods("POST")
 			break
-		case 1:
+		case Read:
 			rs.Router.HandleFunc(rs.APIVersion+routes.RouteFind, router.Find).Methods("GET")
 			break
-		case 2:
+		case ReadAll:
 			rs.Router.HandleFunc(rs.APIVersion+routes.RouteFindAll, router.FindAll).Methods("GET")
 			break
-		case 3:
+		case Update:
 			rs.Router.HandleFunc(rs.APIVersion+routes.RouteUpdate, router.Update).Methods("PUT")
 			break
-		case 4:
+		case Remove:
 			rs.Router.HandleFunc(rs.APIVersion+routes.RouteDelete, router.Remove).Methods("DELETE")
 			break
 		}

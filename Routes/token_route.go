@@ -19,26 +19,27 @@ type TokenRoute struct {
 }
 
 /*CreateNewToken - it is function for creating new token*/
-func (t *TokenRoute) CreateNewToken(tok *Models.Token) error {
+func (rs *TokenRoute) CreateNewToken(tok *Models.Token) error {
 	return nil
 }
 
 /*FindAllToken - it is function for getting all tokens*/
-func (t *TokenRoute) FindAllToken(tok *Models.Token) ([]Models.Token, error) {
+func (rs *TokenRoute) FindAllToken(tok *Models.Token) ([]Models.Token, error) {
 	return nil, nil
 }
 
 /*FindTokenByID - it is structure for getting token by her id*/
-func (t *TokenRoute) FindTokenByID(id string) (Models.Token, error) {
+func (rs *TokenRoute) FindTokenByID(id string) (Models.Token, error) {
 	return Models.Token{}, nil
 }
 
 /*UpdateToken - it is function for refreshing token*/
-func (t *TokenRoute) UpdateToken() (Models.Token, error) {
+func (rs *TokenRoute) UpdateToken() (Models.Token, error) {
 	return Models.Token{}, nil
 }
 
-func (rs *TokenRoute) Setting(features []int, db *mgo.Database) {
+/*Setting - настройка роутера*/
+func (rs *TokenRoute) Setting(middlewares map[MiddleWare][]Permission, db *mgo.Database) {
 	rs.Routes = RouteCRUDs{
 		RouteCreate: "/token",
 		// RouteDelete: "/comments/{id}",
@@ -56,7 +57,7 @@ func (rs *TokenRoute) Setting(features []int, db *mgo.Database) {
 	var routr IRouter
 	routr = rs
 
-	rs.RI.ConfigureRouterWithFeatures(routr.(IRouter), features, rs.Routes)
+	rs.RI.ConfigureMiddlewaresWithFeatures(routr.(IRouter), middlewares, rs.Routes)
 
 	log.Println("Token route was settinged!")
 }

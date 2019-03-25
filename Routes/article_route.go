@@ -2,6 +2,7 @@ package Routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -69,7 +70,8 @@ func (rs *ArticleRoute) FindAll(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusNoContent, articles)
+	fmt.Println("[ROUTE]: ", articles)
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, articles)
 }
 
 /*Update - function for updating article by indentificator*/
@@ -118,7 +120,7 @@ func (rs *ArticleRoute) Remove(w http.ResponseWriter, r *http.Request) {
 }
 
 /*Setting - function for setting router for articles*/
-func (rs *ArticleRoute) Setting(fetures []int, db *mgo.Database) {
+func (rs *ArticleRoute) Setting(middlewares map[MiddleWare][]Permission, db *mgo.Database) {
 	rs.Routes = RouteCRUDs{
 		RouteCreate:  "/article",
 		RouteDelete:  "/articles/{id}",
@@ -136,7 +138,7 @@ func (rs *ArticleRoute) Setting(fetures []int, db *mgo.Database) {
 	var routr IRouter
 	routr = rs
 
-	rs.RI.ConfigureRouterWithFeatures(routr.(IRouter), fetures, rs.Routes)
+	rs.RI.ConfigureMiddlewaresWithFeatures(routr.(IRouter), middlewares, rs.Routes)
 
 	log.Println("routes for articles was configurated")
 }

@@ -134,7 +134,7 @@ func (rs *CommentsRoute) Remove(w http.ResponseWriter, r *http.Request) {
 // }
 
 /*Setting - настроечный интерфейс*/
-func (rs *CommentsRoute) Setting(features []int, db *mgo.Database) {
+func (rs *CommentsRoute) Setting(middlewares map[MiddleWare][]Permission, db *mgo.Database) {
 	rs.Routes = RouteCRUDs{
 		RouteCreate:  "/comment",
 		RouteDelete:  "/comments/{id}",
@@ -152,7 +152,7 @@ func (rs *CommentsRoute) Setting(features []int, db *mgo.Database) {
 	var routr IRouter
 	routr = rs
 
-	rs.RI.ConfigureRouterWithFeatures(routr.(IRouter), features, rs.Routes)
+	rs.RI.ConfigureMiddlewaresWithFeatures(routr.(IRouter), middlewares, rs.Routes)
 
 	log.Println("Comment route was settinged!")
 }

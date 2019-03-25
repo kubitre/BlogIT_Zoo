@@ -132,7 +132,7 @@ func (rs *TagRoute) Remove(w http.ResponseWriter, r *http.Request) {
 // 	log.Println("routes for tags was configurated")
 // }
 
-func (rs *TagRoute) Setting(features []int, db *mgo.Database) {
+func (rs *TagRoute) Setting(middlewares map[MiddleWare][]Permission, db *mgo.Database) {
 	rs.Routes = RouteCRUDs{
 		RouteCreate:  "/tag",
 		RouteDelete:  "/tag/{id}",
@@ -150,7 +150,7 @@ func (rs *TagRoute) Setting(features []int, db *mgo.Database) {
 	var routr IRouter
 	routr = rs
 
-	rs.RI.ConfigureRouterWithFeatures(routr.(IRouter), features, rs.Routes)
+	rs.RI.ConfigureMiddlewaresWithFeatures(routr.(IRouter), middlewares, rs.Routes)
 
 	log.Println("Tag route was settinged!")
 }

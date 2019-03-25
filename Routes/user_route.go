@@ -23,13 +23,13 @@ type UserRoute struct {
 	ISetting
 }
 
-/*CreateNewUser - function for creating new User*/
-func (routeSetting *UserRoute) Create(w http.ResponseWriter, r *http.Request) {
+/*Create - function for creating new User*/
+func (rs *UserRoute) Create(w http.ResponseWriter, r *http.Request) {
 	// log.Println("handle create user blog")
 	defer r.Body.Close()
 	var user Models.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "Invalid payload!",
 			"errorCode": err.Error(),
 		})
@@ -38,99 +38,99 @@ func (routeSetting *UserRoute) Create(w http.ResponseWriter, r *http.Request) {
 
 	// log.Println("handling user: ", user)
 
-	if err := routeSetting.DAO.InsertDb(user); err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+	if err := rs.DAO.InsertDb(user); err != nil {
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "Invalid operation",
 			"errorCode": err.Error(),
 		})
 		return
 	}
 
-	routeSetting.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, "user success created")
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, "user success created")
 }
 
-/*FindUserByID - function for finding User by indentificator*/
-func (routeSetting *UserRoute) Find(w http.ResponseWriter, r *http.Request) {
+/*Find - function for finding User by indentificator*/
+func (rs *UserRoute) Find(w http.ResponseWriter, r *http.Request) {
 	// log.Println("handle find user from blog by id")
 	params := mux.Vars(r)
-	user, err := routeSetting.DAO.FindByID(params["id"])
+	user, err := rs.DAO.FindByID(params["id"])
 	if err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "Invalid payload!",
 			"errorCode": err.Error(),
 		})
 		return
 	}
 
-	routeSetting.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, user)
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, user)
 }
 
-/*FindAllUsers - function for finding all Users in database*/
-func (routeSetting *UserRoute) FindAll(w http.ResponseWriter, r *http.Request) {
+/*FindAll - function for finding all Users in database*/
+func (rs *UserRoute) FindAll(w http.ResponseWriter, r *http.Request) {
 	// log.Println("handle find all users from blog")
-	users, err := routeSetting.DAO.FindAll()
+	users, err := rs.DAO.FindAll()
 	if err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "Invalid operation",
 			"errorCode": err.Error(),
 		})
 		return
 	}
 
-	routeSetting.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, users)
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, users)
 }
 
-/*UpdateUserByID - function for updating User by indentificator*/
-func (routeSetting *UserRoute) Update(w http.ResponseWriter, r *http.Request) {
+/*Update - function for updating User by indentificator*/
+func (rs *UserRoute) Update(w http.ResponseWriter, r *http.Request) {
 	// log.Println("handle update user from blog")
 	var user Models.User
 	defer r.Body.Close()
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "Invalid payload!",
 			"errorCode": err.Error(),
 		})
 		return
 	}
 
-	if err := routeSetting.DAO.Update(user); err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+	if err := rs.DAO.Update(user); err != nil {
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "Invalid operation",
 			"errorCode": err.Error(),
 		})
 		return
 	}
 
-	routeSetting.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, "user successfully updated!")
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, "user successfully updated!")
 }
 
-/*DeleteUserByID - function for remove User by indentificator*/
-func (routeSetting *UserRoute) Remove(w http.ResponseWriter, r *http.Request) {
+/*Remove - function for remove User by indentificator*/
+func (rs *UserRoute) Remove(w http.ResponseWriter, r *http.Request) {
 	// log.Println("handle delete user from blog")
 	var user Models.User
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "Invalid payload!",
 			"errorCode": err.Error(),
 		})
 		return
 	}
 
-	if err := routeSetting.DAO.Delete(user); err != nil {
-		routeSetting.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
+	if err := rs.DAO.Delete(user); err != nil {
+		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "Invalid operation",
 			"errorCode": err.Error(),
 		})
 		return
 	}
 
-	routeSetting.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, "user deleted complete")
+	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, "user deleted complete")
 }
 
 /*Setting - настройка роутера*/
-func (rs *UserRoute) Setting(features []int, db *mgo.Database) {
+func (rs *UserRoute) Setting(middlewares map[MiddleWare][]Permission, db *mgo.Database) {
 	rs.Routes = RouteCRUDs{
 		RouteCreate:  "/user",
 		RouteDelete:  "/users/{id}",
@@ -148,7 +148,7 @@ func (rs *UserRoute) Setting(features []int, db *mgo.Database) {
 		Database: db,
 	}
 
-	rs.RI.ConfigureRouterWithFeatures(routr.(IRouter), features, rs.Routes)
+	rs.RI.ConfigureMiddlewaresWithFeatures(routr.(IRouter), middlewares, rs.Routes)
 
 	log.Println("User route was settinged!")
 }
