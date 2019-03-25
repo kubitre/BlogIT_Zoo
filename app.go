@@ -10,17 +10,19 @@ import (
 
 	"github.com/kubitre/blog/Config"
 	"github.com/kubitre/blog/Dao"
-	"github.com/kubitre/blog/Routes"
+	. "github.com/kubitre/blog/Routes"
 )
 
-/*Application - базовый тип, объединяющий в себе роутер, dao, db*/
-type Application struct {
-	Database     *mgo.Database        // прослойка бд, через которую будет работать Dao layer
-	Port         int                  // порт, на котором будет запущен сервис
-	LogLevel     int                  // уровень логирования (0 - на базе stdout, 1 - в файл )
-	DbConfigFile string               // файлик конфигурации подключения к бд
-	Routers      *Routes.RouteSetting // объединяющий роутер
-}
+type (
+	/*Application - базовый тип, объединяющий в себе роутер, dao, db*/
+	Application struct {
+		Database     *mgo.Database // прослойка бд, через которую будет работать Dao layer
+		Port         int           // порт, на котором будет запущен сервис
+		LogLevel     int           // уровень логирования (0 - на базе stdout, 1 - в файл )
+		DbConfigFile string        // файлик конфигурации подключения к бд
+		Routers      *RouteSetting // объединяющий роутер
+	}
+)
 
 var app = &Application{}
 
@@ -37,7 +39,6 @@ func (app *Application) ParseCommandsFromCommandLine() *Application {
 		Port:         *portNumber,
 		DbConfigFile: *dbconfigFile,
 		LogLevel:     *logLevel,
-		Routers:      Routes.CreateNewRouter("/v0.1"),
 	}
 
 	return app
@@ -56,6 +57,7 @@ func (app *Application) Configurating() *Application {
 	}
 	bdRouter.Connect()
 	app.Database = bdRouter.Db
+	app.Routers = CreateNewRouter("/v0.1", app.Database)
 
 	return app
 }
@@ -68,12 +70,27 @@ func init() {
 func main() {
 	log.Println("api was started on port: ", strconv.Itoa(app.Port))
 
-	Routes.StartModeRouters(map[int][]int{
-		0: []int{0, 1, 2, 3, 4},
-		1: []int{0, 1, 2, 3, 4},
-		2: []int{0, 1, 2, 3, 4},
-		3: []int{0, 1, 2, 3, 4},
-		4: []int{0, 1, 2, 3, 4},
+	StartModeRouters(map[Features]map[MiddleWare][]Permission{
+		FArticle(): map[MiddleWare][]Permission{
+			MRouter(): RR(),
+			MAuth():   CUD(),
+		},
+		FComment(): map[MiddleWare][]Permission{
+			MRouter(): RR(),
+			MAuth():   CUD(),
+		},
+		FTag(): map[MiddleWare][]Permission{
+			MRouter(): RR(),
+			MAuth():   CUD(),
+		},
+		FUser(): map[MiddleWare][]Permission{
+			MRouter(): CRR(),
+			MAuth():   UD(),
+		},
+		FToken(): map[MiddleWare][]Permission{
+			MRouter(): []Permission{Cre()},
+			MAuth():   RUD(),
+		},
 	}, app.Routers,
 		app.Database,
 	)
