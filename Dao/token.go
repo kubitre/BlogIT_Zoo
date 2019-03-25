@@ -1,6 +1,8 @@
 package Dao
 
 import (
+	"time"
+
 	"github.com/kubitre/blog/Models"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -16,13 +18,37 @@ const (
 )
 
 /*CreateNewToken - запись нового токена в базу данных*/
-func (setDao *TokenDao) CreateNewToken(newtoken Models.Token) (Models.Token, error) {
-	newtoken.ID = bson.NewObjectId()
-	err := setDao.Database.C(collectionTokens).Insert(&newtoken)
-	return newtoken, err
+func (setDao *TokenDao) CreateNewToken(newtoken string, id_user bson.ObjectId) (Models.Token, error) {
+
+	tok := &Models.Token{
+		ID:         bson.NewObjectId(),
+		Value:      newtoken,
+		ValidateTo: time.Since(time.Now().Add(time.Hour * 24)).Nanoseconds(),
+		UserID:     id_user,
+	}
+
+	err := setDao.Database.C(collectionTokens).Insert(&tok)
+	return *tok, err
 }
 
 /*FindToken - поиск токена в бд*/
-func (setDao *TokenDao) FindToken(id string) error {
-	return nil
+func (setDao *TokenDao) FindToken(id bson.ObjectId) (*Models.Token, error) {
+	var token Models.Token
+
+	err := setDao.Database.C(collectionTokens).Find(bson.M{
+		"id_user": id,
+	}).One(&token)
+
+	return &token, err
+}
+
+/*FindTokenByValue - поиск токена в бд по его значению*/
+func (setDao *TokenDao) FindTokenByValue(tokenValue string) (*Models.Token, error) {
+	var token Models.Token
+
+	err := setDao.Database.C(collectionTokens).Find(bson.M{
+		"maintoken": tokenValue,
+	}).One(&token)
+
+	return &token, err
 }

@@ -1,6 +1,7 @@
 package Dao
 
 import (
+	"fmt"
 	"time"
 
 	mgo "gopkg.in/mgo.v2"
@@ -65,6 +66,7 @@ func (setting *SettingArticle) FindByID(id string) (art Models.Article, err erro
 - поиск всех записей в коллекции и возврат слайса с ними лио ошибки, в случае возникновения*/
 func (setting *SettingArticle) FindAll() (arts []Models.Article, err error) {
 	err = setting.Database.C(collectionArticles).Find(bson.M{}).All(&arts)
+	fmt.Println("[DAO]: ", arts)
 	return
 }
 

@@ -1,9 +1,14 @@
 package Dao
 
 import (
+	"log"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
+
 	mgo "gopkg.in/mgo.v2"
+
+	"errors"
 
 	"github.com/kubitre/blog/Models"
 	"gopkg.in/mgo.v2/bson"
@@ -20,9 +25,17 @@ const (
 
 /*InsertDb - function for creating new user in db*/
 func (setting *SettingUser) InsertDb(User Models.User) (err error) {
-	User.ID = bson.NewObjectId()
-	User.Verificated = false
+	User.ID = bson.NewObjectIdWithTime(time.Now())
 	User.CreatedAt = time.Now()
+
+	if !User.ID.Valid() {
+		return errors.New("PANICA!!")
+	}
+
+	log.Println("[DAO]: Insert new user: ", User)
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(User.Password), 10)
+	User.Password = string(hash)
 
 	err = setting.Database.C(collectionUsers).Insert(&User)
 	return
@@ -31,6 +44,26 @@ func (setting *SettingUser) InsertDb(User Models.User) (err error) {
 /*FindByID - function for finding element by indentificator and return this object with error if this exist*/
 func (setting *SettingUser) FindByID(id string) (usr Models.User, err error) {
 	err = setting.Database.C(collectionUsers).FindId(bson.ObjectIdHex(id)).One(usr)
+	return
+}
+
+/*FindByUserCredentials - поиск по логину*/
+func (setting *SettingUser) FindByUserCredentials(user *Models.Login) (result Models.User, err error) {
+	err = setting.Database.C(collectionUsers).Find(bson.M{
+		"name": user.Username,
+	}).One(&result)
+
+	log.Println("Get data from db: ", result)
+
+	if err != nil {
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(user.Password))
+	// if result.Password == user.Password {
+	// 	return
+	// }
+
 	return
 }
 
