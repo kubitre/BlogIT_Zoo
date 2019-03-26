@@ -61,6 +61,12 @@ func (ec *ECDSAMiddle) Logout(token string) error {
 	return nil
 }
 
+/*TokenValidation - проверка валидаци токена (распарс токена, проверка времени жизни токена, уровня доступа)*/
+func (ec *ECDSAMiddle) TokenValidation(token string) (bool, error) {
+	result, _, err := ec.GoJWTECDSA.ValidateToken(token)
+	return result, err
+}
+
 /*InitInstance - инициализация объекта ECDSA*/
 func (ec *ECDSAMiddle) InitInstance(db *mgo.Database) error {
 	gojwtO1, err := gojwt.NewGojwtECDSA("kubitre_blog_server", "Access_key", "/keys/priv_key.pem", "/keys/pub_key.pem", "384", 24)
