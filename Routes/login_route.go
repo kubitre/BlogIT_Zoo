@@ -83,6 +83,7 @@ func (rs *LoginRoute) SetupRouterSetting(rS *RouteSetting) {
 
 /*SetupDaos - устаовка DAO слоёв в объект LoginRoute*/
 func (rs *LoginRoute) SetupDaos(db *mgo.Database) {
+
 	rs.TokenDao = &Dao.TokenDao{
 		Database: db,
 	}
@@ -92,4 +93,9 @@ func (rs *LoginRoute) SetupDaos(db *mgo.Database) {
 
 	rs.MiddleAuth = &security.ECDSAMiddle{}
 	rs.MiddleAuth.InitInstance(db)
+}
+
+/*GetJWTMiddleware - получение мидлвари*/
+func (rs *LoginRoute) GetJWTMiddleware() *security.ECDSAMiddle {
+	return rs.MiddleAuth
 }

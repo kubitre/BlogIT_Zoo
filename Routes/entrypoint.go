@@ -101,13 +101,16 @@ func (rs *RouteSetting) Setting(db *mgo.Database) {
 
 /*CreateNewRouter - создание нового роутера*/
 func CreateNewRouter(version string, database *mgo.Database) *RouteSetting {
+	responser := &Responser{
+		Error: false,
+	}
 	rs := &RouteSetting{
-		Responser: &Responser{
-			Error: false,
+		Responser:  responser,
+		APIVersion: version,
+		SecurityLayer: &JWTChecker{
+			Responser: responser,
 		},
-		APIVersion:    version,
-		SecurityLayer: &JWTChecker{},
-		Router:        mux.NewRouter(),
+		Router: mux.NewRouter(),
 	}
 
 	rs.SecurityLayer.DaoToken = &Dao.TokenDao{
