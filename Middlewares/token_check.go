@@ -59,7 +59,7 @@ func (tjwt *JWTChecker) JWTCMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-/*ConfiguratingJWTWithSigningMethod - конфигурация мидлвари на чек токена*/
+/*ConfiguratingJWTWithSigningMethod - конфигурация мидлвари на чек токена, с методом подписи*/
 func (tjwt *JWTChecker) ConfiguratingJWTWithSigningMethod(jwtmiddleware *security.ECDSAMiddle) {
 	tjwt.JWTMiddleWare = jwtmiddleware
 }

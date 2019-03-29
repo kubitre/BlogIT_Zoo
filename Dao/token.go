@@ -14,7 +14,7 @@ type TokenDao struct {
 }
 
 const (
-	collectionTokens = "/tokens"
+	collectionTokens = "tokens"
 )
 
 /*CreateNewToken - запись нового токена в базу данных*/
@@ -23,7 +23,7 @@ func (setDao *TokenDao) CreateNewToken(newtoken string, id_user bson.ObjectId) (
 	tok := &Models.Token{
 		ID:         bson.NewObjectId(),
 		Value:      newtoken,
-		ValidateTo: time.Since(time.Now().Add(time.Hour * 24)).Nanoseconds(),
+		ValidateTo: time.Second * 60,
 		UserID:     id_user,
 	}
 
@@ -51,4 +51,13 @@ func (setDao *TokenDao) FindTokenByValue(tokenValue string) (*Models.Token, erro
 	}).One(&token)
 
 	return &token, err
+}
+
+/*RemoveToken - удаление токена из бд*/
+func (setDao *TokenDao) RemoveToken(token *Models.Token) error {
+	err := setDao.Database.C(collectionTokens).RemoveId(bson.M{
+		"_id": token.ID,
+	})
+
+	return err
 }

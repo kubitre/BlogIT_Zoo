@@ -1,6 +1,9 @@
 package security
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/jenazads/gojwt"
 	"github.com/kubitre/blog/Dao"
 	"github.com/kubitre/blog/Models"
@@ -30,9 +33,21 @@ func (ec *ECDSAMiddle) Login(obj Models.Login) (*Models.Token, error) {
 	if err != nil {
 		// log.Println("Поиск токена: ", err)
 		token, err := ec.GoJWTECDSA.CreateToken(obj.Username)
+
 		tokModel, err := daoToken.CreateNewToken(token, usrInBd.ID)
 
 		return &tokModel, err
+	} else {
+		date := token.Createdat
+		date.Add(token.ValidateTo)
+		if date.After(time.Now()) {
+			fmt.Println("Current Date: ", time.Now(), ", Date in zapis: ", date.String())
+			daoToken.RemoveToken(token)
+			token, err := ec.GoJWTECDSA.CreateToken(obj.Username)
+			tokModel, err := daoToken.CreateNewToken(token, usrInBd.ID)
+
+			return &tokModel, err
+		}
 	}
 	return token, nil
 }
@@ -69,7 +84,7 @@ func (ec *ECDSAMiddle) TokenValidation(token string) (bool, error) {
 
 /*InitInstance - инициализация объекта ECDSA*/
 func (ec *ECDSAMiddle) InitInstance(db *mgo.Database) error {
-	gojwtO1, err := gojwt.NewGojwtECDSA("kubitre_blog_server", "Access_key", "/keys/priv_key.pem", "/keys/pub_key.pem", "384", 24)
+	gojwtO1, err := gojwt.NewGojwtECDSA("kubitre_blog_server", "Access_key", "/keys/priv_key.pem", "/keys/pub_key.pem", "384", 1)
 
 	if err != nil {
 		return err

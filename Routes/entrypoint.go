@@ -95,6 +95,8 @@ func (rs *RouteSetting) Setting(db *mgo.Database) {
 	lr.SetupRouterSetting(rs)
 	lr.SetupDaos(db)
 
+	rs.SecurityLayer.ConfiguratingJWTWithSigningMethod(lr.MiddleAuth)
+
 	rs.Router.HandleFunc(rs.APIVersion+lr.Routes.RouteCreate, lr.Authentication).Methods("POST")
 	rs.Router.HandleFunc(rs.APIVersion+lr.Routes.RouteDelete, lr.Logout).Methods("DELETE")
 }

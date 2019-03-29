@@ -41,17 +41,8 @@ func (rs *LoginRoute) Authentication(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dataJson, err := json.Marshal(token)
-
-	if err != nil {
-		rs.RI.Responser.ResponseWithError(w, r, http.StatusUnauthorized, map[string]string{
-			"error": err.Error(),
-		})
-		return
-	}
-
 	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string]interface{}{
-		"token": dataJson,
+		"token": token.Value,
 	})
 
 	// rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string]string{
