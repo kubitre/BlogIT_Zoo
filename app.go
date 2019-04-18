@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/rs/cors"
+
 	mgo "gopkg.in/mgo.v2"
 
-	"github.com/kubitre/blog/Config"
-	"github.com/kubitre/blog/Dao"
-	. "github.com/kubitre/blog/Routes"
+	"blog_module/Config"
+	"blog_module/Dao"
+	. "blog_module/Routes"
 )
 
 type (
@@ -29,7 +31,7 @@ var app = &Application{}
 /*ParseCommandsFromCommandLine - парсинг аргументов командной строки*/
 func (app *Application) ParseCommandsFromCommandLine() *Application {
 
-	portNumber := flag.Int("port", 9999, "главный порт для всех хэндлеров")
+	portNumber := flag.Int("port", 9997, "главный порт для всех хэндлеров")
 	dbconfigFile := flag.String("db_config", "config.toml", "файл конфигурации подключения к бд")
 	logLevel := flag.Int("log", 0, "уровень логирования, 0 - на уровне stdout, 1 - в файл")
 
@@ -95,7 +97,17 @@ func main() {
 		app.Database,
 	)
 
-	if err := http.ListenAndServe(":"+strconv.Itoa(int(app.Port)), app.Routers.Router); err != nil {
+	// cors middleware
+
+	handler := cors.New(
+		cors.Options{
+			AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+			AllowedHeaders: []string{"Content-Type", "Accept", "Authorization", "Access-Control-Allow-Origin"},
+			AllowedOrigins: []string{"http://localhost:3000", "http://192.168.100.3:3000", "http://localhost:3001"},
+			Debug:          true,
+		}).Handler(app.Routers.Router)
+
+	if err := http.ListenAndServe(":"+strconv.Itoa(int(app.Port)), handler); err != nil {
 		log.Fatal(err)
 	}
 }
