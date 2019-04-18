@@ -5,9 +5,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kubitre/blog/Dao"
-	"github.com/kubitre/blog/Models"
-	"github.com/kubitre/blog/security"
+	"blog_module/Dao"
+	"blog_module/Models"
+	"blog_module/security"
+
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -42,7 +43,9 @@ func (rs *LoginRoute) Authentication(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string]interface{}{
-		"token": token.Value,
+		"token":    token.Value,
+		"username": logpayload.Username,
+		"userid":   token.UserID,
 	})
 
 	// rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string]string{

@@ -5,10 +5,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kubitre/blog/Dao"
+	"blog_module/Dao"
+
 	mgo "gopkg.in/mgo.v2"
 
-	"github.com/kubitre/blog/Models"
+	"blog_module/Models"
 
 	"github.com/gorilla/mux"
 )

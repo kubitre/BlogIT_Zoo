@@ -8,9 +8,10 @@ import (
 
 	mgo "gopkg.in/mgo.v2"
 
+	"blog_module/Dao"
+	"blog_module/Models"
+
 	"github.com/gorilla/mux"
-	"github.com/kubitre/blog/Dao"
-	"github.com/kubitre/blog/Models"
 )
 
 /*ArticleRoute - Structure for route emdedeed*/
@@ -27,6 +28,9 @@ type ArticleRoute struct {
 func (rs *ArticleRoute) Create(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var article Models.Article
+
+	// body, _ := ioutil.ReadAll(r.Body)
+	// fmt.Println("Received packet: ", string(body))
 
 	if err := json.NewDecoder(r.Body).Decode(&article); err != nil {
 		rs.RI.Responser.ResponseWithError(w, r, http.StatusExpectationFailed, map[string]string{

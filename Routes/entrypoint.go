@@ -3,8 +3,9 @@ package Routes
 import (
 	"net/http"
 
-	"github.com/kubitre/blog/Dao"
-	. "github.com/kubitre/blog/Middlewares"
+	"blog_module/Dao"
+	. "blog_module/Middlewares"
+
 	mgo "gopkg.in/mgo.v2"
 
 	"github.com/gorilla/mux"

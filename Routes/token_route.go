@@ -3,8 +3,9 @@ package Routes
 import (
 	"log"
 
-	"github.com/kubitre/blog/Dao"
-	"github.com/kubitre/blog/Models"
+	"blog_module/Dao"
+	"blog_module/Models"
+
 	mgo "gopkg.in/mgo.v2"
 )
 

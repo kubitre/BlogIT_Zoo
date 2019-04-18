@@ -5,11 +5,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kubitre/blog/Dao"
+	"blog_module/Dao"
+
 	mgo "gopkg.in/mgo.v2"
 
+	"blog_module/Models"
+
 	"github.com/gorilla/mux"
-	"github.com/kubitre/blog/Models"
 )
 
 /*TagRoute - Structure for route emdedeed*/

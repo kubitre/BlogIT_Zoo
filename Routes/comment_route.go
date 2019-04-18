@@ -2,12 +2,14 @@ package Routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
+	"blog_module/Dao"
+	"blog_module/Models"
+
 	"github.com/gorilla/mux"
-	"github.com/kubitre/blog/Dao"
-	"github.com/kubitre/blog/Models"
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -46,6 +48,7 @@ func (rs *CommentsRoute) Create(w http.ResponseWriter, r *http.Request) {
 /*Find - function for finding comment by indentificator*/
 func (rs *CommentsRoute) Find(w http.ResponseWriter, r *http.Request) {
 	var params = mux.Vars(r)
+	fmt.Println("[COMMENT_ROUTE]: start fetching")
 	comment, err := rs.DAO.FindByID(params["id"])
 	if err != nil {
 		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
@@ -59,8 +62,11 @@ func (rs *CommentsRoute) Find(w http.ResponseWriter, r *http.Request) {
 
 /*FindAll - function for finding all comments in database*/
 func (rs *CommentsRoute) FindAll(w http.ResponseWriter, r *http.Request) {
-	comments, err := rs.DAO.FindAll()
+	var params = mux.Vars(r)
+	fmt.Println("[COMMENT_ROUTE]: start fetching")
+	comments, err := rs.DAO.FindAll(params["id"])
 	if err != nil {
+
 		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
 			"error":     "invalid operation",
 			"errorCode": err.Error(),
@@ -139,7 +145,7 @@ func (rs *CommentsRoute) Setting(middlewares map[MiddleWare][]Permission, db *mg
 		RouteCreate:  "/comment",
 		RouteDelete:  "/comments/{id}",
 		RouteFind:    "/comments/{id}", //  поиск комментария по
-		RouteFindAll: "/comments/{id}",
+		RouteFindAll: "/commentss/{id}",
 		RouteUpdate:  "/comments/{id}",
 	}
 
