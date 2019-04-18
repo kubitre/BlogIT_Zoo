@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css?family=Allerta+Stencil');
+
+.logotype_component{
+    margin: 0;
+    position: absolute;
+    top: 40%;
+    left: 42%;
+    color: white;
+    display: inline-block;
+
+    .text_wrapper{
+        padding: 50px 35px;
+        border: 7px solid white;
+        font-family: 'Allerta Stencil', sans-serif;
+        font-size: 3.6em;
+
+        @media screen  and (max-width: 480px){
+            font-size: 1.5em;
+        }
+    }
+}

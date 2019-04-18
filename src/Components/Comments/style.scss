@@ -1,0 +1,44 @@
+.comments_container{
+    display: flex;
+    flex-direction: column;
+    margin-top: 50px;
+
+    .header_comments{
+        font-size: 2.0em;
+        border-bottom: 1px solid #e6e6e6;
+    }
+
+    .comments_body{
+        font-size: 1.3em;
+    }
+}
+
+.input_block{
+    display: flex;
+}
+
+.comment_container{
+    display: flex;
+    flex-direction: row;
+
+    background: #e6e6e6;
+    padding: 15px;
+
+    .left{
+        display: flex;
+        flex-direction: column;
+        margin-right: 50px;
+    }
+    .right{
+        display: flex;
+        flex-direction: column;
+    }
+
+    .autor_with_time{
+        display: flex;
+        
+        .created{
+            margin-left: 15px;
+        }
+    }
+}

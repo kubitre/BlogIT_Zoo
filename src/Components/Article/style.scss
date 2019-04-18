@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css?family=Spectral:500,700,800&subset=cyrillic');
+
+.article_container_with_panel{
+
+    overflow: auto;
+
+    .article_container{
+        display: flex;
+        flex-direction: column;
+        font-family: 'Spectral', serif;
+    
+        margin: 0 100px;
+        padding: 50px;
+        background: white;
+        box-shadow: 10px 15px 15px 15px #e6e6e6;
+        
+        .header{
+            font-size: 1.6em;
+            margin: 15px;
+            text-align: center;
+            font-weight: 800;
+        }
+    
+        .body{
+            font-size: 1.3em;
+            font-weight: 500;
+        }
+    
+    }
+}
