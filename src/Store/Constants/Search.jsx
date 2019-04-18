@@ -1,0 +1,3 @@
+export const HOVER_SEARCH = "HOVER_SEARCH";
+export const CLICK_SEARCH = "CLICK_SEARCH";
+export const ENTER_SEARCH = "ENTER_SEARCH";
