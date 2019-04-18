@@ -1,0 +1,10 @@
+.articles_page_container{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0 0vw;
+    background: #e6e6e6;
+    margin: 0 10vw;
+    overflow-y: auto;
+    align-items: center;
+}
