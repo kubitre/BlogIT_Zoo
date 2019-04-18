@@ -5,7 +5,8 @@ import (
 
 	mgo "gopkg.in/mgo.v2"
 
-	"github.com/kubitre/blog/Models"
+	"blog_module/Models"
+
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -46,8 +47,10 @@ func (setting *SettingComment) FindByID(id string) (comm Models.Comment, err err
 
 /*FindAll - function for find all lines in db and return slices with them with error or withour error
 - функция для поиска всех записей в бд и возврат слайса с этими элементами а также ошибки, если таковая возникает*/
-func (setting *SettingComment) FindAll() (comms []Models.Comment, err error) {
-	err = setting.Database.C(collectionComments).Find(bson.M{}).All(comms)
+func (setting *SettingComment) FindAll(id string) (comms []Models.Comment, err error) {
+	err = setting.Database.C(collectionComments).Find(bson.M{
+		"id_article": id,
+	}).All(&comms)
 	return
 }
 

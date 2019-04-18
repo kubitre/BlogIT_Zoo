@@ -5,7 +5,8 @@ import (
 
 	mgo "gopkg.in/mgo.v2"
 
-	"github.com/kubitre/blog/Models"
+	"blog_module/Models"
+
 	"gopkg.in/mgo.v2/bson"
 )
 
