@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/kubitre/blog/security"
+	"blog_module/security"
 
-	"github.com/kubitre/blog/Dao"
+	"blog_module/Dao"
 )
 
 /*JWTChecker - прослойка для проверки токена*/

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/kubitre/blog/Logs"
+	"blog_module/Logs"
 )
 
 /*Responser - тип содержащий базовые методы для обработок ошибочных и успешных запросов*/
