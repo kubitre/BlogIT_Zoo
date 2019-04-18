@@ -1,10 +1,11 @@
 package Routes
 
 import (
+	"blog_module/Config"
+	"blog_module/Dao"
+	"blog_module/Routes"
+
 	"github.com/gorilla/mux"
-	"github.com/kubitre/blog/Config"
-	"github.com/kubitre/blog/Dao"
-	"github.com/kubitre/blog/Routes"
 )
 
 /*ApplicationForTesting - ir is structure for testing main api*/
