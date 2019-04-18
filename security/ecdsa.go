@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"blog_module/Dao"
+	"blog_module/Models"
+
 	"github.com/jenazads/gojwt"
-	"github.com/kubitre/blog/Dao"
-	"github.com/kubitre/blog/Models"
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -84,7 +85,7 @@ func (ec *ECDSAMiddle) TokenValidation(token string) (bool, error) {
 
 /*InitInstance - инициализация объекта ECDSA*/
 func (ec *ECDSAMiddle) InitInstance(db *mgo.Database) error {
-	gojwtO1, err := gojwt.NewGojwtECDSA("kubitre_blog_server", "Access_key", "/keys/priv_key.pem", "/keys/pub_key.pem", "384", 1)
+	gojwtO1, err := gojwt.NewGojwtECDSA("kubitre_blog_server", "Access_key", "/keys/priv_key.pem", "/keys/pub_key.pem", "384", 3600)
 
 	if err != nil {
 		return err
