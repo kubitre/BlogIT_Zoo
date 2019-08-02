@@ -8,9 +8,12 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/gorilla/mux v1.7.1
 	github.com/jenazads/gojwt v0.0.0-20180831060034-a349912c9bc2
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/rs/cors v1.6.0
 	golang.org/x/crypto v0.0.0-20190417170229-92d88b081a49
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
+	gopkg.in/yaml.v2 v2.2.2 // indirect
 )

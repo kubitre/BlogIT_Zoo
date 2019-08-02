@@ -7,7 +7,7 @@ import (
 
 	"blog_module/Dao"
 
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 
 	"blog_module/Models"
 

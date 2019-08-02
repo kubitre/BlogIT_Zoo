@@ -8,7 +8,7 @@ import (
 
 	"github.com/rs/cors"
 
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 
 	"blog_module/Config"
 	"blog_module/Dao"
@@ -66,38 +66,35 @@ func (app *Application) Configurating() *Application {
 
 func init() {
 	app = app.ParseCommandsFromCommandLine().Configurating()
-	// app.Routers.Setting()
 }
 
 func main() {
 	log.Println("api was started on port: ", strconv.Itoa(app.Port))
 
 	StartModeRouters(map[Features]map[MiddleWare][]Permission{
-		FArticle(): map[MiddleWare][]Permission{
+		FArticle(): {
 			MRouter(): RR(),
 			MAuth():   CUD(),
 		},
-		FComment(): map[MiddleWare][]Permission{
+		FComment(): {
 			MRouter(): RR(),
 			MAuth():   CUD(),
 		},
-		FTag(): map[MiddleWare][]Permission{
+		FTag(): {
 			MRouter(): RR(),
 			MAuth():   CUD(),
 		},
-		FUser(): map[MiddleWare][]Permission{
+		FUser(): {
 			MRouter(): CRR(),
 			MAuth():   UD(),
 		},
-		FToken(): map[MiddleWare][]Permission{
+		FToken(): {
 			MRouter(): []Permission{Cre()},
 			MAuth():   RUD(),
 		},
 	}, app.Routers,
 		app.Database,
 	)
-
-	// cors middleware
 
 	handler := cors.New(
 		cors.Options{

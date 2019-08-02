@@ -8,7 +8,7 @@ import (
 	"blog_module/Models"
 
 	"github.com/jenazads/gojwt"
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 )
 
 /*ECDSAMiddle - Структура для обработки пользовательских данных*/
@@ -32,7 +32,6 @@ func (ec *ECDSAMiddle) Login(obj Models.Login) (*Models.Token, error) {
 
 	token, err := daoToken.FindToken(usrInBd.ID)
 	if err != nil {
-		// log.Println("Поиск токена: ", err)
 		token, err := ec.GoJWTECDSA.CreateToken(obj.Username)
 
 		tokModel, err := daoToken.CreateNewToken(token, usrInBd.ID)

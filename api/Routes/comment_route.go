@@ -10,7 +10,7 @@ import (
 	"blog_module/Models"
 
 	"github.com/gorilla/mux"
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 )
 
 /*CommentsRoute - Structure for route emdedeed*/
@@ -125,20 +125,6 @@ func (rs *CommentsRoute) Remove(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// /*StartSettingRouterComment - function for setting router for articles*/
-// func (rs *CommentsRoute) StartSettingRouterComment(router *mux.Router) *mux.Router {
-
-// 	// router.HandleFunc(rs.APIRoute, rs.CreateNewComment).Methods("POST")
-// 	// router.HandleFunc(rs.APIRoute, rs.FindAllComments).Methods("GET")
-// 	// router.HandleFunc(rs.APIRoute, rs.FindCommentByID).Methods("GET")
-// 	// router.HandleFunc(rs.APIRoute, rs.UpdateCommentByID).Methods("PUT")
-// 	// router.HandleFunc(rs.APIRoute, rs.DeleteCommentByID).Methods("DELETE")
-
-// 	log.Println("router for comments was configurated")
-
-// 	return router
-// }
-
 /*Setting - настроечный интерфейс*/
 func (rs *CommentsRoute) Setting(middlewares map[MiddleWare][]Permission, db *mgo.Database) {
 	rs.Routes = RouteCRUDs{
@@ -148,8 +134,6 @@ func (rs *CommentsRoute) Setting(middlewares map[MiddleWare][]Permission, db *mg
 		RouteFindAll: "/commentss/{id}",
 		RouteUpdate:  "/comments/{id}",
 	}
-
-	// fmt.Println("Current router: ", *rs)
 
 	rs.DAO = &Dao.SettingComment{
 		Database: db,

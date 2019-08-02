@@ -6,7 +6,7 @@ import (
 	"blog_module/Dao"
 	. "blog_module/Middlewares"
 
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 
 	"github.com/gorilla/mux"
 )

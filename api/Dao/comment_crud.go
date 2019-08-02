@@ -3,7 +3,7 @@ package Dao
 import (
 	"time"
 
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 
 	"blog_module/Models"
 

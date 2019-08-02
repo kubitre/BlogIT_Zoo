@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 
 	"blog_module/Dao"
 	"blog_module/Models"
@@ -136,8 +136,6 @@ func (rs *ArticleRoute) Setting(middlewares map[MiddleWare][]Permission, db *mgo
 	rs.DAO = &Dao.SettingArticle{
 		Database: db,
 	}
-
-	// fmt.Println("Current router: ", *rs)
 
 	var routr IRouter
 	routr = rs
