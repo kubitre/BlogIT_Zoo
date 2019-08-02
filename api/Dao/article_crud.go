@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 
 	"blog_module/Models"
 
@@ -33,13 +33,6 @@ func (setting *SettingArticle) InsertDb(article Models.Article) (art Models.Arti
 
 	err = setting.Database.C(collectionUsers).FindId(bson.ObjectIdHex(article.AuthorID)).One(&author)
 
-	// queryStr := bson.M{}
-	// var queryStrs []bson.ObjectId
-	// for _, tagval := range article.TagsIDs {
-	// 	queryStrs = append(queryStrs, bson.ObjectIdHex(tagval))
-	// }
-	// queryStr["_id"] = queryStrs
-	// err = db.C(collectionTags).Find(queryStr).All(&tags)
 	for _, tagval := range article.TagsIDs {
 		var temptag Models.Tag
 		err = setting.Database.C(collectionTags).Find(bson.M{"_id": bson.ObjectIdHex(tagval)}).One(&temptag)

@@ -6,7 +6,7 @@ import (
 	"blog_module/Dao"
 	"blog_module/Models"
 
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 )
 
 /*TokenRoute - it is structure which contain info about errors and contain routing handlers*/

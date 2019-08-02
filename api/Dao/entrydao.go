@@ -3,7 +3,7 @@ package Dao
 import (
 	"log"
 
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 )
 
 /*SettingDao - it is structure for setting data access objects for bd connection

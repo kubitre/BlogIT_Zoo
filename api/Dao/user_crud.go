@@ -6,7 +6,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 
 	"errors"
 

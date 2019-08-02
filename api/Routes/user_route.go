@@ -7,7 +7,7 @@ import (
 
 	"blog_module/Dao"
 
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 
 	"blog_module/Models"
 
@@ -36,8 +36,6 @@ func (rs *UserRoute) Create(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-
-	// log.Println("handling user: ", user)
 
 	if err := rs.DAO.InsertDb(user); err != nil {
 		rs.RI.Responser.ResponseWithError(w, r, http.StatusInternalServerError, map[string]string{
@@ -139,8 +137,6 @@ func (rs *UserRoute) Setting(middlewares map[MiddleWare][]Permission, db *mgo.Da
 		RouteFindAll: "/users",
 		RouteUpdate:  "/users/{id}",
 	}
-
-	// fmt.Println("Current router: ", *rs)
 
 	var routr IRouter
 	routr = rs

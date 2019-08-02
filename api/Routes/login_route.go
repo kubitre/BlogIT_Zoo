@@ -9,7 +9,7 @@ import (
 	"blog_module/Models"
 	"blog_module/security"
 
-	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
 )
 
 type LoginRoute struct {
@@ -47,11 +47,6 @@ func (rs *LoginRoute) Authentication(w http.ResponseWriter, r *http.Request) {
 		"username": logpayload.Username,
 		"userid":   token.UserID,
 	})
-
-	// rs.RI.Responser.ResponseWithJSON(w, r, http.StatusOK, map[string]string{
-	// 	"username": logpayload.Username,
-	// 	"password": logpayload.Password,
-	// })
 }
 
 /*Logout - выход из учётки по токену*/
