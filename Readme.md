@@ -1,6 +1,6 @@
-#API для блога
+# API для блога
 
-##Main language and technologies for our project:
+## Main language and technologies for our project:
 1. Golang 1.9
 2. Mongodb 4.0.6
 *For starting this serivce you need install golang 1.9 and prepare following steps:*
